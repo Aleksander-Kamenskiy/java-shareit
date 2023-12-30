@@ -10,52 +10,50 @@ import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
-public class ItemServiceDaoImpl implements ItemServiceDao {
+public class ItemDaoImpl implements ItemDao {
 
-    private final Map<Long, List<Item>> items = new HashMap<>();
+    private final Map<Long, Set<Long>> userItems = new HashMap<>();
+
+    private final Map<Long, Item> items = new HashMap<>();
     private Long generatorId = 1L;
 
     @Override
     public Item add(Item item) {
         item.setId(generatorId);
         generatorId++;
-        List<Item> listItems = new ArrayList<>();
-        listItems.add(item);
-        items.put(item.getOwner(), listItems);
+        Set<Long> setItems = new HashSet<>();
+        setItems.add(item.getId());
+        userItems.put(item.getOwner().getId(), setItems);
+        items.put(item.getId(), item);
         return item;
     }
 
     @Override
     public Item update(Item item) {
-        List<Item> userItems = items.get(item.getOwner());
-        List<Item> toRemove = userItems.stream()
-                .filter(userItem -> userItem.getId().equals(item.getId()))
-                .collect(Collectors.toList());
-        userItems.removeAll(toRemove);
-        userItems.add(item);
+        items.put(item.getId(), item);
         return item;
     }
 
 
     @Override
     public Optional<Item> findItemById(Long itemId) {
-        return items.values().stream()
-                .flatMap(Collection::stream)
-                .filter(item -> item.getId().equals(itemId))
-                .findFirst();
+        return Optional.ofNullable(items.get(itemId));
     }
 
     @Override
     public List<Item> findAll(Long userId) {
-        return new ArrayList<>(items.get(userId));
+        List<Item> itemsList = new ArrayList<>();
+        for (Long itemId : userItems.get(userId)) {
+            itemsList.add(items.get(itemId));
+        }
+        return itemsList;
     }
 
     @Override
     public List<Item> search(String text) {
         String searchText = text.toLowerCase();
         return items.values().stream()
-                .flatMap(Collection::stream)
-                .filter(Item::getAvailable)
+                .filter(Item::isAvailable)
                 .filter(item -> item.getName().toLowerCase().contains(searchText)
                         || item.getDescription().toLowerCase().contains(searchText))
                 .collect(Collectors.toList());

@@ -10,7 +10,7 @@ import java.util.*;
 
 @Repository
 @RequiredArgsConstructor
-public class UserServiceDaoImpl implements UserServiceDao {
+public class UserDao implements UserServiceDao {
     private final Map<Long, User> users = new HashMap<>();
     private final Set<String> emails = new HashSet<>();
     private Long generatorId = 1L;
@@ -26,25 +26,25 @@ public class UserServiceDaoImpl implements UserServiceDao {
     }
 
     @Override
-    public User update(Long id, User user) {
-        checkUserInMemory(id);
-        updateEmail(findById(id).getEmail(), user.getEmail());
-        users.put(id, user);
-        return users.get(id);
+    public User update(User user) {
+        checkUserInMemory(user.getId());
+        updateEmail(findById(user.getId()).get().getEmail(), user.getEmail());
+        users.put(user.getId(), user);
+        return users.get(user.getId());
     }
 
 
     @Override
-    public User findById(Long id) {
+    public Optional<User> findById(Long id) {
         checkUserInMemory(id);
-        return users.get(id);
+        return Optional.of(users.get(id));
     }
 
 
     @Override
     public void delete(Long id) {
         checkUserInMemory(id);
-        emails.remove(findById(id).getEmail());
+        emails.remove(findById(id).get().getEmail());
         users.remove(id);
     }
 

@@ -19,26 +19,40 @@ public class UserController {
 
     @PostMapping
     public UserDto add(@Valid @RequestBody UserDto userDto) {
-        return userService.add(userDto);
+        log.info("POST Запрос на добавление пользователя " + userDto.toString());
+        UserDto userDto1 = userService.add(userDto);
+        log.info("Добавлен пользователь " + userDto.toString());
+        return userDto1;
     }
 
     @GetMapping("/{userId}")
     public UserDto findById(@PathVariable Long userId) {
-        return userService.findById(userId);
+        log.info("GET Запрос на получение пользователя с id = " + userId);
+        UserDto userDto = userService.findById(userId);
+        log.info("Получен пользователь с id = " + userId);
+        return userDto;
     }
 
     @GetMapping
     public List<UserDto> findAll() {
-        return userService.findAll();
+        log.info("GET Запрос на получение всех пользователей");
+        List<UserDto> list = userService.findAll();
+        log.info("Все пользователи получены");
+        return list;
     }
 
     @PatchMapping("/{userId}")
     public UserDto update(@PathVariable Long userId, @RequestBody UserDto userDto) {
-        return userService.update(userId, userDto);
+        log.info("PATCH Запрос на обновление пользователя с id = " + userId);
+        UserDto userDto1 = userService.update(userId, userDto);
+        log.info("Обновлен пользователь с id = " + userId);
+        return userDto1;
     }
 
     @DeleteMapping("/{userId}")
     public void delete(@PathVariable Long userId) {
+        log.info("DELETE Запрос на удаление пользователя с id = " + userId);
         userService.delete(userId);
+        log.info("Удален пользователь с id = " + userId);
     }
 }

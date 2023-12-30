@@ -8,7 +8,7 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
-import ru.practicum.shareit.user.service.UserServiceDaoImpl;
+import ru.practicum.shareit.user.service.UserDao;
 
 import java.util.Collections;
 import java.util.List;
@@ -18,45 +18,36 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class ItemServiceDtoImpl implements ItemServiceDto {
-    private final ItemServiceDao itemDao;
-    private final UserServiceDaoImpl userService;
+public class ItemServiceImpl implements ItemService {
+    private final ItemDao itemDao;
+    private final UserDao userService;
 
     @Override
     public ItemDto add(Long userId, ItemDto itemDto) {
-        UserDto user = UserMapper.toUserDto(userService.findById(userId));
+        UserDto user = UserMapper.toUserDto(userService.findById(userId).get());
         Item item = ItemMapper.toItem(itemDto);
-        item.setOwner((UserMapper.toUser(user)).getId());
+        item.setOwner(UserMapper.toUser(user));
         return ItemMapper.toItemDto(itemDao.add(item));
     }
 
     @Override
     public ItemDto update(Long userId, Long itemId, ItemDto itemDto) {
-        UserDto user = UserMapper.toUserDto(userService.findById(userId));
         Optional<Item> itemOptional = itemDao.findItemById(itemId);
-        if (itemOptional.isPresent()) {
-            if (!itemOptional.get().getOwner().equals(userId)) {
-                throw new NotFoundException(String.format("Пользователь с id %s " +
-                        "не является владельцем вещи id %s.", userId, itemId));
-            }
-            Item itemFromStorage = itemOptional.get();
-            Item item = ItemMapper.toItem(itemDto);
-            if (Objects.isNull(item.getAvailable())) {
-                item.setAvailable(itemFromStorage.getAvailable());
-            }
-            if (Objects.isNull(item.getDescription())) {
-                item.setDescription(itemFromStorage.getDescription());
-            }
-            if (Objects.isNull(item.getName())) {
-                item.setName(itemFromStorage.getName());
-            }
-            item.setId(itemFromStorage.getId());
-            item.setRequest(itemFromStorage.getRequest());
-            item.setOwner(itemFromStorage.getOwner());
-
-            return ItemMapper.toItemDto(itemDao.update(item));
+        if (!itemOptional.isPresent() || !itemOptional.get().getOwner().getId().equals(userId)) {
+            throw new NotFoundException(String.format("Пользователь с id %s " +
+                    "не является владельцем вещи id %s.", userId, itemId));
         }
-        return itemDto;
+        Item itemFromStorage = itemOptional.get();
+        if (!Objects.isNull(itemDto.getAvailable())) {
+            itemFromStorage.setAvailable(itemDto.getAvailable());
+        }
+        if (!Objects.isNull(itemDto.getDescription())) {
+            itemFromStorage.setDescription(itemDto.getDescription());
+        }
+        if (!Objects.isNull(itemDto.getName())) {
+            itemFromStorage.setName(itemDto.getName());
+        }
+        return ItemMapper.toItemDto(itemDao.update(itemFromStorage));
     }
 
     @Override

@@ -11,16 +11,18 @@ public class ItemMapper {
                 item.getId(),
                 item.getName(),
                 item.getDescription(),
-                item.getAvailable(),
-                item.getRequest() != null ? item.getRequest() : null);
+                item.isAvailable());
     }
 
     public static Item toItem(ItemDto itemDto) {
+        boolean available = false;
+        if (itemDto.getAvailable() != null) {
+            available = itemDto.getAvailable();
+        }
         return new Item(
                 itemDto.getId(),
                 itemDto.getName(),
                 itemDto.getDescription(),
-                itemDto.getAvailable(),
-                itemDto.getRequest() != null ? itemDto.getRequest() : null);
+                available);
     }
 }
