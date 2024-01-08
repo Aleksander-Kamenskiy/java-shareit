@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.dto.UserUpdateDto;
 import ru.practicum.shareit.user.service.UserServiceDtoImpl;
 
 import javax.validation.Valid;
@@ -18,11 +19,11 @@ public class UserController {
     private final UserServiceDtoImpl userService;
 
     @PostMapping
-    public UserDto add(@Valid @RequestBody UserDto userDto) {
-        log.info("POST Запрос на добавление пользователя " + userDto.toString());
-        UserDto userDto1 = userService.add(userDto);
-        log.info("Добавлен пользователь " + userDto.toString());
-        return userDto1;
+    public UserDto add(@Valid @RequestBody UserDto userCreateDto) {
+        log.info("POST Запрос на добавление пользователя " + userCreateDto.toString());
+        UserDto userDto = userService.add(userCreateDto);
+        log.info("Добавлен пользователь " + userCreateDto.toString());
+        return userDto;
     }
 
     @GetMapping("/{userId}")
@@ -42,11 +43,11 @@ public class UserController {
     }
 
     @PatchMapping("/{userId}")
-    public UserDto update(@PathVariable Long userId, @RequestBody UserDto userDto) {
+    public UserDto update(@PathVariable Long userId, @RequestBody UserUpdateDto userUpdateDto) {
         log.info("PATCH Запрос на обновление пользователя с id = " + userId);
-        UserDto userDto1 = userService.update(userId, userDto);
+        UserDto userDto = userService.update(userId, userUpdateDto);
         log.info("Обновлен пользователь с id = " + userId);
-        return userDto1;
+        return userDto;
     }
 
     @DeleteMapping("/{userId}")

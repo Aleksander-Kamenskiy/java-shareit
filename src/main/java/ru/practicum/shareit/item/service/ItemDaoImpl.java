@@ -36,7 +36,7 @@ public class ItemDaoImpl implements ItemDao {
 
 
     @Override
-    public Optional<Item> findItemById(Long itemId) {
+    public Optional<Item> findById(Long itemId) {
         return Optional.ofNullable(items.get(itemId));
     }
 

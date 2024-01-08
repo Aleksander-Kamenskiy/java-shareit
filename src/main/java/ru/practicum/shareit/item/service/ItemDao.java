@@ -11,7 +11,7 @@ public interface ItemDao {
 
     Item update(Item item);
 
-    Optional<Item> findItemById(Long itemId);
+    Optional<Item> findById(Long itemId);
 
     List<Item> findAll(Long userId);
 

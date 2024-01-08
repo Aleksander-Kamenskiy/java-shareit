@@ -18,27 +18,27 @@ public class ItemController {
     private final ItemService itemService;
 
     @PostMapping
-    public ItemDto add(@RequestHeader(USER_HEADER) Long userId, @Valid @RequestBody ItemDto itemDto) {
-        log.info("POST Запрос на добавление пользователем с id = " + userId + " предмета " + itemDto.toString());
-        ItemDto itemDto1 = itemService.add(userId, itemDto);
+    public ItemDto add(@RequestHeader(USER_HEADER) Long userId, @Valid @RequestBody ItemDto itemCreateDto) {
+        log.info("POST Запрос на добавление пользователем с id = " + userId + " предмета " + itemCreateDto.toString());
+        ItemDto itemDto = itemService.add(userId, itemCreateDto);
         log.info("Предмет добавлен пользователю");
-        return itemDto1;
+        return itemDto;
     }
 
     @PatchMapping("/{itemId}")
-    public ItemDto update(@RequestHeader(USER_HEADER) Long userId, @RequestBody ItemDto itemDto, @PathVariable Long itemId) {
+    public ItemDto update(@RequestHeader(USER_HEADER) Long userId, @RequestBody ItemDto itemUpdateDto, @PathVariable Long itemId) {
         log.info("PATCH Запрос на обновление предмета с id = " + itemId + " пользователем с id = " + userId);
-        ItemDto itemDto1 = itemService.update(userId, itemId, itemDto);
+        ItemDto itemDto = itemService.update(userId, itemId, itemUpdateDto);
         log.info("Предмет обновлен пользователем");
-        return itemDto1;
+        return itemDto;
     }
 
     @GetMapping("/{itemId}")
     public ItemDto findById(@RequestHeader(USER_HEADER) Long userId, @PathVariable("itemId") Long itemId) {
         log.info("GET Запрос на получение предмета с id = " + itemId + " пользователем с id = " + userId);
-        ItemDto itemDto1 = itemService.findItemById(userId, itemId);
+        ItemDto itemDto = itemService.findById(userId, itemId);
         log.info("Предмет получен пользователем");
-        return itemDto1;
+        return itemDto;
     }
 
     @GetMapping

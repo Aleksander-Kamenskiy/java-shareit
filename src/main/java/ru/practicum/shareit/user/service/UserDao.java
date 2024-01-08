@@ -2,7 +2,6 @@ package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.NotUniqueEmailException;
 import ru.practicum.shareit.user.model.User;
 
@@ -27,8 +26,14 @@ public class UserDao implements UserServiceDao {
 
     @Override
     public User update(User user) {
-        checkUserInMemory(user.getId());
-        updateEmail(findById(user.getId()).get().getEmail(), user.getEmail());
+        String oldEmail = users.get(user.getId()).getEmail();
+        emails.remove(oldEmail);
+        if (emails.contains(user.getEmail())) {
+            emails.add(oldEmail);
+            throw new NotUniqueEmailException("Пользователь с такой электронной почтой уже существует");
+        }
+        emails.add(user.getEmail());
+
         users.put(user.getId(), user);
         return users.get(user.getId());
     }
@@ -36,15 +41,13 @@ public class UserDao implements UserServiceDao {
 
     @Override
     public Optional<User> findById(Long id) {
-        checkUserInMemory(id);
-        return Optional.of(users.get(id));
+        return Optional.ofNullable(users.get(id));
     }
 
 
     @Override
     public void delete(Long id) {
-        checkUserInMemory(id);
-        emails.remove(findById(id).get().getEmail());
+        emails.remove(users.get(id).getEmail());
         users.remove(id);
     }
 
@@ -56,21 +59,6 @@ public class UserDao implements UserServiceDao {
     private void checkEmail(User user) {
         if (emails.contains(user.getEmail())) {
             throw new NotUniqueEmailException("Пользователь с такой электронной почтой уже существует");
-        }
-    }
-
-    private void updateEmail(String oldEmail, String newEmail) {
-        emails.remove(oldEmail);
-        if (emails.contains(newEmail)) {
-            emails.add(oldEmail);
-            throw new NotUniqueEmailException("Пользователь с такой электронной почтой уже существует");
-        }
-        emails.add(newEmail);
-    }
-
-    private void checkUserInMemory(Long id) {
-        if (!users.containsKey(id)) {
-            throw new NotFoundException("Пользователя с " + id + " не существует");
         }
     }
 }

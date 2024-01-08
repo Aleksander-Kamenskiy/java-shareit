@@ -6,8 +6,7 @@ import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.mapper.UserMapper;
+import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserDao;
 
 import java.util.Collections;
@@ -20,24 +19,29 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
     private final ItemDao itemDao;
-    private final UserDao userService;
+    private final UserDao userDao;
 
     @Override
     public ItemDto add(Long userId, ItemDto itemDto) {
-        UserDto user = UserMapper.toUserDto(userService.findById(userId).get());
+        Optional<User> userOptional = userDao.findById(userId);
+        if (!userOptional.isPresent()) {
+            throw new NotFoundException(String.format("Пользователь с id %s " +
+                    "не найден.", userId));
+        }
         Item item = ItemMapper.toItem(itemDto);
-        item.setOwner(UserMapper.toUser(user));
+        item.setOwner(userOptional.get());
         return ItemMapper.toItemDto(itemDao.add(item));
     }
 
     @Override
     public ItemDto update(Long userId, Long itemId, ItemDto itemDto) {
-        Optional<Item> itemOptional = itemDao.findItemById(itemId);
-        if (!itemOptional.isPresent() || !itemOptional.get().getOwner().getId().equals(userId)) {
+        Optional<Item> itemOptional = itemDao.findById(itemId);
+        Item itemFromStorage = itemOptional.orElseThrow(() -> new NotFoundException(String.format("Предмет с id %s " +
+                "не найден.", itemId)));
+        if (!itemFromStorage.getOwner().getId().equals(userId)) {
             throw new NotFoundException(String.format("Пользователь с id %s " +
                     "не является владельцем вещи id %s.", userId, itemId));
         }
-        Item itemFromStorage = itemOptional.get();
         if (!Objects.isNull(itemDto.getAvailable())) {
             itemFromStorage.setAvailable(itemDto.getAvailable());
         }
@@ -51,9 +55,8 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDto findItemById(Long userId, Long itemId) {
-        userService.findById(userId);
-        Optional<Item> itemGet = itemDao.findItemById(itemId);
+    public ItemDto findById(Long userId, Long itemId) {
+        Optional<Item> itemGet = itemDao.findById(itemId);
         if (itemGet.isEmpty()) {
             throw new NotFoundException(String.format("У пользователя с id %s не " +
                     "существует вещи с id %s", userId, itemId));
@@ -63,7 +66,6 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> findAll(Long userId) {
-        userService.findById(userId);
         List<Item> itemList = itemDao.findAll(userId);
         return itemList.stream()
                 .map(ItemMapper::toItemDto)
@@ -72,7 +74,6 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> search(Long userId, String text) {
-        userService.findById(userId);
         if (text.isBlank()) {
             return Collections.emptyList();
         }

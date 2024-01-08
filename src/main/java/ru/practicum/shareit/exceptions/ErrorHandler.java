@@ -18,27 +18,27 @@ public class ErrorHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFoundException(final NotFoundException e) {
         log.warn("Объект не найден.");
-        return new ErrorResponse(e.getMessage(), convertStackTrace(e));
+        return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler({MethodArgumentNotValidException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleValidationException(final MethodArgumentNotValidException e) {
         log.warn("Ошибка валидации объекта");
-        return new ErrorResponse(e.getMessage(), convertStackTrace(e));
+        return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler({NotUniqueEmailException.class})
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handleNotUniqueEmailException(final NotUniqueEmailException e) {
         log.warn("Не уникальный Email.");
-        return new ErrorResponse(e.getMessage(), convertStackTrace(e));
+        return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleOtherException(final Throwable e) {
-        log.warn("Внутренняя ошибка сервера." + e.getStackTrace());
+        log.warn("Внутренняя ошибка сервера.", e);
         return new ErrorResponse(e.getMessage(), convertStackTrace(e));
     }
 
