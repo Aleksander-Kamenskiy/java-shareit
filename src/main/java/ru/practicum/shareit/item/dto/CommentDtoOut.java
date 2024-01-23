@@ -1,22 +1,18 @@
-package ru.practicum.shareit.request.dto;
+package ru.practicum.shareit.item.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.practicum.shareit.user.dto.UserDto;
 
 import java.time.LocalDateTime;
 
-/**
- * TODO Sprint add-item-requests.
- */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ItemRequestDto {
-
+public class CommentDtoOut {
     private Long id;
-    private String description;
-    private UserDto requester;
+    private String text;
+    private String authorName;
     private LocalDateTime created;
+    private Long itemId;
 }

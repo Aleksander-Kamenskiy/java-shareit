@@ -1,5 +1,6 @@
 package ru.practicum.shareit.user.service;
 
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exceptions.NotFoundException;
@@ -7,57 +8,67 @@ import ru.practicum.shareit.user.dto.UserUpdateDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
+import ru.practicum.shareit.user.repository.UserRepository;
+
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class UserServiceDtoImpl implements UserServiceDto {
 
-    private final UserServiceDao userServiceDao;
+    private final UserRepository userRepository;
 
 
     @Override
+    @Transactional
     public UserDto add(UserDto userDto) {
         User user = UserMapper.toUser(userDto);
-        return UserMapper.toUserDto(userServiceDao.add(user));
-    }
-
-    @Override
-    public UserDto update(Long id, UserUpdateDto userUpdateDto) {
-        User user = new User();
-        UserDto userFromMemory = findById(id);
-
-        if (userUpdateDto.getName() != null) {
-            user.setName(userUpdateDto.getName());
-        } else {
-            user.setName(userFromMemory.getName());
-        }
-        if (userUpdateDto.getEmail() != null) {
-            user.setEmail(userUpdateDto.getEmail());
-        } else {
-            user.setEmail(userFromMemory.getEmail());
-        }
-        user.setId(id);
-        return UserMapper.toUserDto(userServiceDao.update(user));
-    }
-
-    @Override
-    public UserDto findById(Long id) {
-        Optional<User> userOptional = userServiceDao.findById(id);
-        User user = userOptional.orElseThrow(() -> new NotFoundException("Пользователя с " + id + " не существует"));
+        user = userRepository.save(user);
         return UserMapper.toUserDto(user);
     }
 
     @Override
-    public void delete(Long id) {
-        userServiceDao.delete(id);
+    @Transactional
+    public UserDto update(Long id, UserUpdateDto userUpdateDto) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> {
+                            return new NotFoundException("Пользователя с " + id + " не существует");
+                        }
+                );
+        String name = userUpdateDto.getName();
+        if (name != null && !name.isBlank()) {
+            user.setName(name);
+        }
+        String email = userUpdateDto.getEmail();
+        if (email != null && !email.isBlank()) {
+            user.setEmail(email);
+        }
+        return UserMapper.toUserDto(user);
     }
 
     @Override
+    @Transactional
+    public UserDto findById(Long id) {
+        User user = userRepository.findById(id).orElseThrow(() -> {
+            return new NotFoundException("Пользователя с " + id + " не существует");
+        });
+        return UserMapper.toUserDto(user);
+    }
+
+    @Override
+    @Transactional
+    public void delete(Long id) {
+        userRepository.deleteById(id);
+    }
+
+    @Override
+    @Transactional
     public List<UserDto> findAll() {
-        return userServiceDao.findAll().stream().map(UserMapper::toUserDto).collect(Collectors.toList());
+        return userRepository.findAll().stream()
+                .map(UserMapper::toUserDto)
+                .collect(Collectors.toList());
     }
 }

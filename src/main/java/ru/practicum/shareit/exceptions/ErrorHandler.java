@@ -28,6 +28,13 @@ public class ErrorHandler {
         return new ErrorResponse(e.getMessage());
     }
 
+    @ExceptionHandler({ValidationException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleValidationException(final ValidationException e) {
+        log.warn("Ошибка валидации объекта");
+        return new ErrorResponse(e.getMessage());
+    }
+
     @ExceptionHandler({NotUniqueEmailException.class})
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handleNotUniqueEmailException(final NotUniqueEmailException e) {
@@ -40,6 +47,13 @@ public class ErrorHandler {
     public ErrorResponse handleOtherException(final Throwable e) {
         log.warn("Внутренняя ошибка сервера.", e);
         return new ErrorResponse(e.getMessage(), convertStackTrace(e));
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleOtherException(final IllegalArgumentException e) {
+        log.warn("Внутренняя ошибка сервера.", e);
+        return new ErrorResponse(e.getMessage());
     }
 
     private String convertStackTrace(Throwable e) {
