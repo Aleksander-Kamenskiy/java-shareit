@@ -16,8 +16,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
-public class UserServiceDtoImpl implements UserServiceDto {
+public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
 
@@ -32,10 +31,10 @@ public class UserServiceDtoImpl implements UserServiceDto {
 
     @Override
     @Transactional
-    public UserDto update(Long id, UserUpdateDto userUpdateDto) {
-        User user = userRepository.findById(id)
+    public UserDto update(UserUpdateDto userUpdateDto) {
+        User user = userRepository.findById(userUpdateDto.getId())
                 .orElseThrow(() -> {
-                            return new NotFoundException("Пользователя с " + id + " не существует");
+                            return new NotFoundException("Пользователя с " + userUpdateDto.getId() + " не существует");
                         }
                 );
         String name = userUpdateDto.getName();
@@ -46,11 +45,12 @@ public class UserServiceDtoImpl implements UserServiceDto {
         if (email != null && !email.isBlank()) {
             user.setEmail(email);
         }
-        return UserMapper.toUserDto(user);
+
+        return UserMapper.toUserDto(userRepository.save(user));
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public UserDto findById(Long id) {
         User user = userRepository.findById(id).orElseThrow(() -> {
             return new NotFoundException("Пользователя с " + id + " не существует");
@@ -65,7 +65,7 @@ public class UserServiceDtoImpl implements UserServiceDto {
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public List<UserDto> findAll() {
         return userRepository.findAll().stream()
                 .map(UserMapper::toUserDto)

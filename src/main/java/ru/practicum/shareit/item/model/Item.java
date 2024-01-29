@@ -3,10 +3,11 @@ package ru.practicum.shareit.item.model;
 import lombok.*;
 
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.request.ItemRequest;
+
 import javax.persistence.*;
 
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
@@ -21,16 +22,12 @@ public class Item {
     private String description;
     @Column(name = "available", nullable = false)
     private Boolean available;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id", nullable = false)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private User owner;
-    @ManyToOne
-    @JoinColumn(name = "request_id")
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    private ItemRequest request;
+
 
     public Item(String name, String description, Boolean available) {
         this.name = name;

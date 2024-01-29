@@ -3,8 +3,9 @@ package ru.practicum.shareit.booking;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.booking.dto.BookingRequestDto;
 import ru.practicum.shareit.booking.dto.BookingDto;
-import ru.practicum.shareit.booking.dto.BookingDtoOut;
+import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.booking.service.BookingService;
 
 
@@ -22,50 +23,58 @@ public class BookingController {
     private final BookingService bookingService;
 
     @PostMapping
-    public BookingDtoOut create(@RequestHeader(USER_HEADER) Long userId,
-                                @Valid @RequestBody BookingDto bookingDto) {
+    public BookingDto create(@RequestHeader(USER_HEADER) Long userId,
+                             @Valid @RequestBody BookingRequestDto bookingRequestDto) {
         log.info("POST запрос на создание нового бронирования вещи от пользователя c id: {} ", userId);
-        BookingDtoOut bookingDtoOut =  bookingService.add(userId, bookingDto);
+        BookingDto bookingDto =  bookingService.add(userId, bookingRequestDto);
         log.info("Новая вещь забронирована");
-        return bookingDtoOut;
+        return bookingDto;
     }
 
     @PatchMapping("/{bookingId}")
-    public BookingDtoOut updateStatus(@RequestHeader(USER_HEADER) Long userId,
-                                      @PathVariable("bookingId")
+    public BookingDto updateStatus(@RequestHeader(USER_HEADER) Long userId,
+                                   @PathVariable("bookingId")
                                       Long bookingId,
-                                      @RequestParam(name = "approved") Boolean approved) {
+                                   @RequestParam(name = "approved") Boolean approved) {
         log.info("PATCH запрос на обновление статуса бронирования вещи от владельца с id: {}", userId);
-        BookingDtoOut bookingDtoOut = bookingService.update(userId, bookingId, approved);
+        BookingDto bookingDto = bookingService.update(userId, bookingId, approved);
         log.info("Статус бронирования вещи обновлен");
-        return bookingDtoOut;
+        return bookingDto;
     }
 
     @GetMapping("/{bookingId}")
-    public BookingDtoOut findBookingById(@RequestHeader(USER_HEADER) Long userId,
-                                         @PathVariable("bookingId")
+    public BookingDto findBookingById(@RequestHeader(USER_HEADER) Long userId,
+                                      @PathVariable("bookingId")
                                          Long bookingId) {
         log.info("GET запрос на получение данных о бронировании от пользователя с id: {}", userId);
-        BookingDtoOut bookingDtoOut = bookingService.findBookingByUserId(userId, bookingId);
+        BookingDto bookingDto = bookingService.findBookingByUserId(userId, bookingId);
         log.info("Данные о бронировании получены");
-        return bookingDtoOut;
+        return bookingDto;
     }
 
     @GetMapping
-    public List<BookingDtoOut> findAll(@RequestHeader(USER_HEADER) Long userId,
-                                       @RequestParam(value = "state", defaultValue = "ALL") String bookingState) {
+    public List<BookingDto> findAll(@RequestHeader(USER_HEADER) Long userId,
+                                    @RequestParam(value = "state", defaultValue = "ALL") String bookingState) {
         log.info("GET запрос на получение списка всех бронирований текущего пользователя с id: {} и статусом {}", userId, bookingState);
-        List<BookingDtoOut>  bookingDtoOutList = bookingService.findAll(userId, bookingState);
+        List<BookingDto> bookingDtoList = bookingService.findAll(userId, validState(bookingState));
         log.info("Список всех бронирований текущего пользователя получен");
-        return bookingDtoOutList;
+        return bookingDtoList;
     }
 
     @GetMapping("/owner")
-    public List<BookingDtoOut> getAllOwner(@RequestHeader(USER_HEADER) Long ownerId,
-                                           @RequestParam(value = "state", defaultValue = "ALL") String bookingState) {
+    public List<BookingDto> getAllOwner(@RequestHeader(USER_HEADER) Long ownerId,
+                                        @RequestParam(value = "state", defaultValue = "ALL") String bookingState) {
         log.info("GET запрос на получение списка всех бронирований текущего владельца с id: {} и статусом {}", ownerId, bookingState);
-        List<BookingDtoOut>  bookingDtoOutList = bookingService.findAllOwner(ownerId, bookingState);
+        List<BookingDto> bookingDtoList = bookingService.findAllOwner(ownerId, validState(bookingState));
         log.info("Список всех бронирований текущего владельца получен");
-        return bookingDtoOutList;
+        return bookingDtoList;
+    }
+
+    private BookingState validState(String bookingState) {
+        BookingState state = BookingState.from(bookingState);
+        if (state == null) {
+            throw new IllegalArgumentException("Unknown state: " + bookingState);
+        }
+        return state;
     }
 }

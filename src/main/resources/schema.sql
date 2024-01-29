@@ -23,8 +23,6 @@ CREATE TABLE IF NOT EXISTS items
     description VARCHAR(512) NOT NULL,
     available   BOOLEAN,
     owner_id    BIGINT       NOT NULL,
-    request_id  BIGINT,
-    FOREIGN KEY (request_id) REFERENCES requests (id),
     CONSTRAINT fk_items_owner_id FOREIGN KEY (owner_id) REFERENCES users (id)
 );
 
