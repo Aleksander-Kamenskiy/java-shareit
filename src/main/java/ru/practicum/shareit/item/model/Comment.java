@@ -15,6 +15,9 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Entity
 @Table(name = "comments", schema = "public")
+@NamedEntityGraph(name = "comment-entity-graph", attributeNodes = {
+        @NamedAttributeNode("author")
+})
 public class Comment {
     @Id
     @Column(name = "id")

@@ -24,9 +24,9 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserDto add(UserDto userDto) {
-        User user = UserMapper.toUser(userDto);
+        User user = UserMapper.toModel(userDto);
         user = userRepository.save(user);
-        return UserMapper.toUserDto(user);
+        return UserMapper.toDto(user);
     }
 
     @Override
@@ -46,7 +46,7 @@ public class UserServiceImpl implements UserService {
             user.setEmail(email);
         }
 
-        return UserMapper.toUserDto(userRepository.save(user));
+        return UserMapper.toDto(userRepository.save(user));
     }
 
     @Override
@@ -55,7 +55,7 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(id).orElseThrow(() -> {
             return new NotFoundException("Пользователя с " + id + " не существует");
         });
-        return UserMapper.toUserDto(user);
+        return UserMapper.toDto(user);
     }
 
     @Override
@@ -68,7 +68,7 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     public List<UserDto> findAll() {
         return userRepository.findAll().stream()
-                .map(UserMapper::toUserDto)
+                .map(UserMapper::toDto)
                 .collect(Collectors.toList());
     }
 }

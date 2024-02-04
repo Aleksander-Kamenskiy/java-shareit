@@ -1,106 +1,57 @@
 package ru.practicum.shareit.booking.repository;
 
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.model.User;
+
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
-    @Query(value = "SELECT b,i FROM Booking b " +
-            "JOIN b.item i " +
-            "WHERE b.booker = ?1")
-    List<Booking> findAllBookingsByBookerId(User booker, Sort sort);
+    @EntityGraph(value = "booking-entity-graph")
+    List<Booking> findAllBookingsByBookerId(Long bookerId, Sort sort);
 
 
-    @Query(value = "SELECT b,i FROM Booking b " +
-            "JOIN b.item i " +
-            "WHERE b.booker = ?1 " +
-            "AND ?2 BETWEEN b.start AND b.end ")
-    List<Booking> findAllCurrentBookingsByBookerId(User booker, LocalDateTime currentTime, Sort sort);
-
-    @Query(value = "SELECT b,i FROM Booking b " +
-            "JOIN b.item i " +
-            "WHERE b.booker = ?1 " +
-            "AND b.end < ?2 ")
-    List<Booking> findAllPastBookingsByBookerId(User booker, LocalDateTime currentTime, Sort sort);
+    @EntityGraph(value = "booking-entity-graph")
+    List<Booking> findAllBookingsByBookerIdAndStartBeforeAndEndAfter(Long bookerId, LocalDateTime startBefore, LocalDateTime endAfter, Sort sort);
 
 
-    @Query(value = "SELECT b,i FROM Booking b " +
-            "JOIN b.item i " +
-            "WHERE b.booker = ?1 " +
-            "AND b.start > ?2 ")
-    List<Booking> findAllFutureBookingsByBookerId(User booker, LocalDateTime currentTime, Sort sort);
+    @EntityGraph(value = "booking-entity-graph")
+    List<Booking> findAllPastBookingsByBookerIdAndEndBefore(Long bookerId, LocalDateTime currentTime, Sort sort);
 
-    @Query(value = "SELECT b,i FROM Booking b " +
-            "JOIN b.item i " +
-            "WHERE b.booker = ?1 " +
-            "AND b.status = 'WAITING' " +
-            "AND b.start > ?2 ")
-    List<Booking> findAllWaitingBookingsByBookerId(User booker, LocalDateTime currentTime, Sort sort);
 
-    @Query(value = "SELECT b,i FROM Booking b " +
-            "JOIN b.item i " +
-            "WHERE b.booker = ?1 " +
-            "AND b.status = 'REJECTED' ")
-    List<Booking> findAllRejectedBookingsByBookerId(User booker, LocalDateTime currentTime, Sort sort);
+    @EntityGraph(value = "booking-entity-graph")
+    List<Booking> findAllFutureBookingsByBookerIdAndStartAfter(Long bookerId, LocalDateTime currentTime, Sort sort);
 
-    @Query(value = "SELECT b,i FROM Booking b " +
-            "JOIN b.item i " +
-            "WHERE i.owner = ?1 ")
-    List<Booking> findAllBookingsByOwnerId(User ownerId, Sort sort);
+    @EntityGraph(value = "booking-entity-graph")
+    List<Booking> findAllWaitingBookingsByBookerIdAndStatusAndStartAfter(Long bookerId, BookingStatus status, LocalDateTime currentTime, Sort sort);
 
-    @Query(value = "SELECT b,i FROM Booking b " +
-            "JOIN b.item i " +
-            "WHERE i.owner = ?1 " +
-            "AND ?2 BETWEEN b.start AND b.end ")
-    List<Booking> findAllCurrentBookingsByOwnerId(User ownerId, LocalDateTime currentTime, Sort sort);
+    @EntityGraph(value = "booking-entity-graph")
+    List<Booking> findAllRejectedBookingsByBookerIdAndStatus(Long bookerId, BookingStatus status, Sort sort);
 
-    @Query(value = "SELECT b,i FROM Booking b " +
-            "JOIN b.item i " +
-            "WHERE i.owner = ?1 " +
-            "AND b.end < ?2 ")
-    List<Booking> findAllPastBookingsByOwnerId(User ownerId, LocalDateTime currentTime, Sort sort);
+    @EntityGraph(value = "booking-entity-graph")
+    List<Booking> findBookingsByItemIdIn(List<Long> itemId, Sort sort);
 
-    @Query(value = "SELECT b,i FROM Booking b " +
-            "JOIN b.item i " +
-            "WHERE i.owner = ?1 " +
-            "AND b.start > ?2 ")
-    List<Booking> findAllFutureBookingsByOwnerId(User ownerId, LocalDateTime currentTime, Sort sort);
+    @EntityGraph(value = "booking-entity-graph")
+    List<Booking> findAllBookingsByItemIdInAndStartBeforeAndEndAfter(List<Long> itemId, LocalDateTime startBefore, LocalDateTime endAfter, Sort sort);
 
-    @Query(value = "SELECT b,i FROM Booking b " +
-            "JOIN b.item i " +
-            "WHERE i.owner = ?1 " +
-            "AND b.status = 'WAITING' " +
-            "AND b.start > ?2 ")
-    List<Booking> findAllWaitingBookingsByOwnerId(User ownerId, LocalDateTime currentTime, Sort sort);
+    @EntityGraph(value = "booking-entity-graph")
+    List<Booking> findAllPastBookingsByItemIdInAndEndBefore(List<Long> itemId, LocalDateTime currentTime, Sort sort);
 
-    @Query(value = "SELECT b,i FROM Booking b " +
-            "JOIN b.item i " +
-            "WHERE i.owner = ?1 " +
-            "AND b.status = 'REJECTED' ")
-    List<Booking> findAllRejectedBookingsByOwnerId(User ownerId, Sort sort);
+    @EntityGraph(value = "booking-entity-graph")
+    List<Booking> findAllFutureBookingsByItemIdInAndStartAfter(List<Long> itemId, LocalDateTime currentTime, Sort sort);
 
-    @Query(value = "SELECT b,i FROM Booking b " +
-            "JOIN b.item i " +
-            "WHERE i.owner = ?1 " +
-            "AND b.start< ?2 " +
-            "AND b.status = 'APPROVED' ")
-    Optional<Booking> getLastBooking(User ownerId, LocalDateTime currentTime, Sort sort);
+    @EntityGraph(value = "booking-entity-graph")
+    List<Booking> findAllWaitingBookingsByItemIdInAndStatusAndStartAfter(List<Long> itemId, BookingStatus status, LocalDateTime currentTime, Sort sort);
 
-    @Query(value = "SELECT b,i FROM Booking b " +
-            "JOIN b.item i " +
-            "WHERE i.owner = ?1 " +
-            "AND b.start > ?2 " +
-            "AND b.status = 'APPROVED' ")
-    Optional<Booking> getNextBooking(User ownerId, LocalDateTime currentTime, Sort sort);
+    @EntityGraph(value = "booking-entity-graph")
+    List<Booking> findAllRejectedBookingsByItemIdInAndStatus(List<Long> itemId, BookingStatus status, Sort sort);
 
     @Query(value = "SELECT b.* FROM bookings b " +
             "JOIN items i ON i.id = b.item_id " +

@@ -13,7 +13,7 @@ import ru.practicum.shareit.user.model.User;
 
 @UtilityClass
 public class BookingMapper {
-    public Booking toBooking(User user, Item item, BookingRequestDto bookingRequestDto) {
+    public Booking toModel(User user, Item item, BookingRequestDto bookingRequestDto) {
         return new Booking(
                 item,
                 bookingRequestDto.getStart(),
@@ -22,13 +22,13 @@ public class BookingMapper {
                 BookingStatus.WAITING);
     }
 
-    public BookingDto toBookingOut(Booking booking) {
+    public BookingDto toDto(Booking booking) {
         return new BookingDto(
                 booking.getId(),
-                ItemMapper.toItemDtoOut(booking.getItem()),
+                ItemMapper.toDto(booking.getItem()),
                 booking.getStart(),
                 booking.getEnd(),
-                UserMapper.toUserDto(booking.getBooker()),
+                UserMapper.toDto(booking.getBooker()),
                 booking.getStatus());
     }
 }
