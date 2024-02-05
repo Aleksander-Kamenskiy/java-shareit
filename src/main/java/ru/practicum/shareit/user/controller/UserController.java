@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.dto.UserUpdateDto;
-import ru.practicum.shareit.user.service.UserServiceDtoImpl;
+import ru.practicum.shareit.user.service.UserServiceImpl;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -16,7 +16,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/users")
 public class UserController {
-    private final UserServiceDtoImpl userService;
+    private final UserServiceImpl userService;
 
     @PostMapping
     public UserDto add(@Valid @RequestBody UserDto userCreateDto) {
@@ -45,7 +45,8 @@ public class UserController {
     @PatchMapping("/{userId}")
     public UserDto update(@PathVariable Long userId, @RequestBody UserUpdateDto userUpdateDto) {
         log.info("PATCH Запрос на обновление пользователя с id = " + userId);
-        UserDto userDto = userService.update(userId, userUpdateDto);
+        userUpdateDto.setId(userId);
+        UserDto userDto = userService.update(userUpdateDto);
         log.info("Обновлен пользователь с id = " + userId);
         return userDto;
     }

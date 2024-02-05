@@ -5,16 +5,16 @@ import lombok.Getter;
 @Getter
 
 public class ErrorResponse {
-    public String message;
+    public String error;
 
     public String stackTrace;
 
-    public ErrorResponse(String message, String stackTrace) {
-        this.message = message;
+    public ErrorResponse(String error, String stackTrace) {
+        this.error = error;
         this.stackTrace = stackTrace;
     }
 
-    public ErrorResponse(String message) {
-        this.message = message;
+    public ErrorResponse(String error) {
+        this.error = error;
     }
 }
